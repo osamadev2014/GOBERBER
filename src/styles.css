@@ -265,3 +265,4 @@
 @utility gradient-radial {
   background: radial-gradient(circle, var(--tw-gradient-from, transparent), var(--tw-gradient-to, transparent));
 }
+
