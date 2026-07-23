@@ -1,0 +1,1 @@
+export const DEFAULT_STORE_DELIVERY_RADIUS_KM = 1.5;

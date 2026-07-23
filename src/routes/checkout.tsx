@@ -5,18 +5,16 @@ import {
   ChevronRight,
   Clock,
   CreditCard,
-  Home,
-  MapPin,
   Truck,
   Wallet,
   Bike,
   Store,
-  Plus,
-  X,
 } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { price } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
+import { AddressSelector } from "@/components/address";
+import { Choice } from "@/components/ui/choice";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -38,24 +36,15 @@ export const Route = createFileRoute("/checkout")({
 
 const STEPS_KEYS = ["checkoutAddress", "checkoutOption", "checkoutPayment", "checkoutReview"] as const;
 
-const DEFAULT_ADDRESSES = [
-  { id: "home", Icon: Home, labelKey: "checkoutHome" as const, addrKey: "checkoutHomeAddr" as const },
-  { id: "work", Icon: MapPin, labelKey: "checkoutWork" as const, addrKey: "checkoutWorkAddr" as const },
-];
-
 function CheckoutPage() {
   const { lines, subtotal, extrasTotal, discount, deliveryFee, total, coupon, clear } = useCart();
   const { t, lang } = useT();
   const [step, setStep] = useState(0);
-  const [addresses, setAddresses] = useState(DEFAULT_ADDRESSES);
   const [address, setAddress] = useState("home");
   const [delivery, setDelivery] = useState<"delivery" | "pickup">("delivery");
   const [time, setTime] = useState("asap");
   const [payment, setPayment] = useState("card");
   const [placed, setPlaced] = useState(false);
-  const [addingAddress, setAddingAddress] = useState(false);
-  const [newLabel, setNewLabel] = useState("");
-  const [newAddr, setNewAddr] = useState("");
 
   const fee = delivery === "pickup" ? 0 : deliveryFee;
   const finalTotal = delivery === "pickup"
@@ -130,62 +119,7 @@ function CheckoutPage() {
         <div className="space-y-6">
           {step === 0 && (
             <Panel title={t("checkoutAddress")}>
-              {addresses.map(({ id, Icon, labelKey, addrKey }) => (
-                <Choice
-                  key={id}
-                  active={address === id}
-                  onClick={() => setAddress(id)}
-                >
-                  <Icon className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="font-semibold text-foreground">{t(labelKey)}</p>
-                    <p className="text-sm text-muted-foreground">{t(addrKey)}</p>
-                  </div>
-                </Choice>
-              ))}
-              {addingAddress ? (
-                <div className="rounded-2xl border border-primary bg-primary/5 p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-primary">{t("checkoutAddNew")}</p>
-                    <button onClick={() => { setAddingAddress(false); setNewLabel(""); setNewAddr(""); }} className="text-muted-foreground hover:text-foreground">
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <input
-                    value={newLabel}
-                    onChange={(e) => setNewLabel(e.target.value)}
-                    placeholder={t("checkoutNewLabel")}
-                    className="w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-                  />
-                  <input
-                    value={newAddr}
-                    onChange={(e) => setNewAddr(e.target.value)}
-                    placeholder={t("checkoutNewAddr")}
-                    className="w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-                  />
-                  <button
-                    disabled={!newLabel.trim() || !newAddr.trim()}
-                    onClick={() => {
-                      const id = `custom-${Date.now()}`;
-                      setAddresses((prev) => [...prev, { id, Icon: MapPin, labelKey: "checkoutHome" as const, addrKey: "checkoutHomeAddr" as const }]);
-                      setAddress(id);
-                      setAddingAddress(false);
-                      setNewLabel("");
-                      setNewAddr("");
-                    }}
-                    className="w-full rounded-full bg-primary py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-                  >
-                    {t("checkoutSaveAddr")}
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setAddingAddress(true)}
-                  className="w-full rounded-2xl border border-dashed border-border/60 py-4 text-sm text-muted-foreground hover:border-primary hover:text-primary"
-                >
-                  {t("checkoutAddNew")}
-                </button>
-              )}
+              <AddressSelector value={address} onChange={setAddress} />
             </Panel>
           )}
 
@@ -309,9 +243,13 @@ function CheckoutPage() {
                 <p>
                   <span className="text-foreground">{t("checkoutReviewDelivery")}</span>
                   {delivery === "delivery"
-                    ? addresses.find((a) => a.id === address)
-                      ? t(addresses.find((a) => a.id === address)!.addrKey)
-                      : "Selected address"
+                    ? address === "map"
+                      ? t("checkoutMapSelected")
+                      : address === "home"
+                        ? t("checkoutHomeAddr")
+                        : address === "work"
+                          ? t("checkoutWorkAddr")
+                          : "Selected address"
                     : t("checkoutReviewPickup")}
                 </p>
                 <p>
@@ -441,37 +379,5 @@ function Panel({
       <h2 className="mb-4 font-display text-xl">{title}</h2>
       <div className="space-y-3">{children}</div>
     </section>
-  );
-}
-
-function Choice({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition-colors ${
-        active
-          ? "border-primary bg-primary/10"
-          : "border-border/60 bg-background hover:border-border"
-      }`}
-    >
-      {children}
-      <span
-        className={`ml-auto flex h-5 w-5 items-center justify-center rounded-full border ${
-          active
-            ? "border-primary bg-primary text-primary-foreground"
-            : "border-border"
-        }`}
-      >
-        {active && <Check className="h-3 w-3" strokeWidth={3} />}
-      </span>
-    </button>
   );
 }

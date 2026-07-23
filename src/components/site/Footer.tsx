@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { Instagram, Facebook, Twitter, Youtube } from "lucide-react";
-import { Logo } from "./Logo";
 import { useT } from "@/lib/i18n";
 
 export function Footer() {
@@ -10,7 +9,7 @@ export function Footer() {
     <footer className="border-t border-border/60 bg-background">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 md:grid-cols-4">
         <div className="md:col-span-1">
-          <Logo />
+          <img src="/footer-logo.svg" alt="Go Burger" className="h-10 w-auto" />
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
             {t("footerDesc")}
           </p>
