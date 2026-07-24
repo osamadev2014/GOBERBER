@@ -16,6 +16,7 @@ export function Header() {
   const nav = [
     { to: "/menu", label: t("navMenu") },
     { to: "/offers", label: t("navOffers") },
+    { to: "/loyalty", label: t("navLoyalty") },
     { to: "/about", label: t("navAbout") },
     { to: "/contact", label: t("navContact") },
   ] as const;
@@ -62,9 +63,7 @@ export function Header() {
             >
               <ShoppingBag className="h-4 w-4" />
               <span className="hidden sm:inline">{t("navCart")}</span>
-              <span className="rounded-full bg-primary-foreground/15 px-1.5 text-xs">
-                {count}
-              </span>
+              <span className="rounded-full bg-primary-foreground/15 px-1.5 text-xs">{count}</span>
             </Link>
             <Link
               to="/account"
